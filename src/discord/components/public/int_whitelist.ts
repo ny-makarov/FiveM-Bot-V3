@@ -84,12 +84,12 @@ new Component({
             }
 
             // Verifica se o ID fornecido está na whitelist e não está banido
-            const [rows] = await connection.query(`SELECT whitelist FROM vrp_infos WHERE id = '${id}'`);
+            const [rows] = await connection.query(`SELECT ${process.env.COLUM_WHITELIST} FROM ${process.env.TABLE_USERS} WHERE id = ?`, [id]);
             if (rows.length > 0) {
                 const { whitelist } = rows[0];
                 if (whitelist === 0) {
                     // Atualiza o ID com whitelist 1
-                    await connection.query(`UPDATE vrp_infos SET whitelist = 1 WHERE id = '${id}'`);
+                    await connection.query(`UPDATE ${process.env.TABLE_USERS} SET ${process.env.COLUM_WHITELIST} = 1 WHERE id = ?`, [id]);
 
 
                     // Altera o nickname do membro

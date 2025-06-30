@@ -33,7 +33,7 @@ new Component({
           title:
             "Deseja realmente fechar o ticket?\nAo fechar o ticket não será gerado o transcript",
           thumbnail: {
-            url: process.env.THUMBNAIL ?? "",
+            url: process.env.LOGO ?? "",
           },
           description:
             "Clique em um dos botões abaixo para confirmar sua escolha:",
@@ -109,7 +109,7 @@ new Component({
           const logEmbed = new EmbedBuilder({
             title: `Ticket #${interaction.channel.name} Foi Fechado sem Transcript`,
             thumbnail: {
-              url: process.env.THUMBNAIL ?? "",
+              url: process.env.LOGO ?? "",
             },
             description: `O Ticket foi fechado por <@${memberId}> **sem transcript.**`,
             timestamp: new Date().toISOString(),

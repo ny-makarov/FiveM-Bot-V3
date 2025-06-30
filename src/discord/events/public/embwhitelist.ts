@@ -35,8 +35,8 @@ async function sendConnectMessage(channel: TextChannel, client: Client) {
     try {
     const embed = new EmbedBuilder({
       title: (process.env.TITULOWL),
-      thumbnail: {
-        url: process.env.THUMBNAIL ?? ""
+      thumbnail:{
+        url: process.env.LOGO ?? ""
       },
       image: {
         url: process.env.BANNERWL ?? "",

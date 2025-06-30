@@ -112,7 +112,7 @@ new Component({
         description:
           "Todos os responsáveis pelo ticket já estão cientes da abertura\nEvite chamar alguém via DM, basta aguardar alguém já irá lhe\natender...",
         thumbnail: {
-          url: interaction.user.displayAvatarURL() ?? process.env.THUMBNAIL,
+          url: interaction.user.displayAvatarURL() ?? process.env.LOGO,
         },
         color: hexToRgb(settings.colors.theme.default),
         fields: [

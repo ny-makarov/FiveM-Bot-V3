@@ -1,9 +1,8 @@
 import { Component, Modal } from "@/discord/base";
 import { reply } from "@/functions";
 import { settings } from "@/settings";
-import { brBuilder, createModalInput, hexToRgb, toNull } from "@magicyan/discord";
+import { brBuilder, createModalInput, hexToRgb } from "@magicyan/discord";
 import { createTranscript } from "discord-html-transcripts";
-import { Storage } from '@google-cloud/storage';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -16,16 +15,16 @@ import {
   ModalBuilder,
   GuildMember,
   TextInputStyle,
-  
-
 } from "discord.js";
-
+import * as fs from 'fs';
+import * as path from 'path';
 
 const BUTTON_IDS = { 
   FINALIZE: "finalizar-ticket",
   TRANSCRIPT: "acessar-transcrip",
   CONFIRM_YES: "confirm-yes",
-  CONFIRM_NO: "confirm-no"
+  CONFIRM_NO: "confirm-no",
+  RATE_SERVICE: "rate-service"
 }
 
 new Component({
@@ -52,7 +51,7 @@ new Component({
         const logEmbed = new EmbedBuilder({
           title:('Deseja Finalizar o ticket?\nAo fechar o ticket será gerado o transcript'),
           thumbnail: {
-            url: process.env.THUMBNAIL ?? ""
+            url: process.env.LOGO ?? ""
           },
           description: "Clique em um dos botões abaixo para confirmar sua escolha:",
           timestamp: new Date().toISOString(),
@@ -85,23 +84,88 @@ new Component({
         const collector = interaction.channel?.createMessageComponentCollector({ time: 15000 });
         collector?.on('collect', async (interaction: ButtonInteraction) => {
           if (interaction.user.id === memberId) {
-            if (interaction.customId === BUTTON_IDS.CONFIRM_YES) {
-              const transcript = await createTranscript(interaction.channel as TextChannel);
-              await logChannel.send({ files: [transcript] });
-              closeTicket(interaction);
-            } else if (interaction.customId === BUTTON_IDS.CONFIRM_NO) {
-              await interaction.followUp({ content: "A Finalização do Ticket foi cancelado!" });
+            try {
+              if (interaction.customId === BUTTON_IDS.CONFIRM_YES) {
+                await interaction.deferReply({ ephemeral: true });
+                
+                const transcript = await createTranscript(interaction.channel as TextChannel, {
+                  returnBuffer: true
+                });
+                const transcriptUrl = await saveTranscript(transcript, interaction.channelId);
+                await logChannel.send({ files: [transcript] });
+                
+                // Get ticket creator from channel topic
+                const ticketCreator = interaction.channel?.topic;
+                if (ticketCreator) {
+                  try {
+                    const user = await interaction.client.users.fetch(ticketCreator);
+                    if (user) {
+                      const dmEmbed = new EmbedBuilder({
+                        title: "Ticket Fechado",
+                        description: `Seu ticket foi fechado por ${interaction.user.tag}`,
+                        color: 0x2F3136,
+                        timestamp: new Date().toISOString(),
+                        footer: {
+                          text: "Sistema de ticket byRomeraSCR"
+                        }
+                      });
+
+                      const actionRow = new ActionRowBuilder<ButtonBuilder>({
+                        components: [
+                          new ButtonBuilder({
+                            url: transcriptUrl,
+                            label: "Acessar Transcript",
+                            style: ButtonStyle.Link,
+                            emoji: "📄"
+                          }),
+                          new ButtonBuilder({
+                            customId: BUTTON_IDS.RATE_SERVICE,
+                            label: "Avaliar Atendimento",
+                            style: ButtonStyle.Success,
+                            emoji: "⭐"
+                          })
+                        ]
+                      });
+
+                      await user.send({
+                        embeds: [dmEmbed],
+                        components: [actionRow]
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Erro ao enviar DM:", error);
+                  }
+                }
+                
+                await interaction.editReply({ content: "Ticket finalizado com sucesso!" });
+                closeTicket(interaction);
+              } else if (interaction.customId === BUTTON_IDS.CONFIRM_NO) {
+                await interaction.deferReply({ ephemeral: true });
+                await interaction.editReply({ content: "A Finalização do Ticket foi cancelado!" });
+              }
+            } catch (error) {
+              console.error("Erro ao processar interação:", error);
+              try {
+                if (!interaction.replied && !interaction.deferred) {
+                  await interaction.reply({ content: "Ocorreu um erro ao processar sua solicitação.", ephemeral: true });
+                } else {
+                  await interaction.editReply({ content: "Ocorreu um erro ao processar sua solicitação." });
+                }
+              } catch (e) {
+                console.error("Erro ao enviar mensagem de erro:", e);
+              }
             }
             collector.stop();
           }
         });
 
         collector?.on('end', async () => {
-          if (message) {
+          try {
             const components = [actionRow];
-            await message.edit({ components }).catch(console.error);
-          } else {
-            console.error('A mensagem ou o canal não existem mais.');
+            components[0].components.forEach(button => button.setDisabled(true));
+            await message.edit({ components }).catch(() => {});
+          } catch (error) {
+            console.error('Erro ao atualizar mensagem:', error);
           }
         });
 
@@ -119,14 +183,67 @@ new Component({
   }
 });
 
+async function saveTranscript(transcript: any, ticketId: string): Promise<string> {
+  const transcriptPath = path.join(process.env.PATH_TRANSCRIPT ?? "", `transcript-${ticketId}.html`);
+  const buffer = Buffer.from(await transcript.attachment.toString());
+  await fs.promises.writeFile(transcriptPath, buffer);
+  return `${process.env.URL_TRANSCRIPT}/transcript-${ticketId}.html`;
+}
+
+async function sendTicketClosedDM(interaction: ButtonInteraction, transcriptUrl: string) {
+  try {
+    const ticketCreator = interaction.channel?.topic?.match(/<@(\d+)>/)?.[1];
+    if (!ticketCreator) return;
+
+    const user = await interaction.client.users.fetch(ticketCreator);
+    if (!user) return;
+
+    const dmEmbed = new EmbedBuilder({
+      title: "Ticket Fechado",
+      description: `Seu ticket foi fechado por ${interaction.user.tag}`,
+      color: 0x2F3136,
+      timestamp: new Date().toISOString(),
+      footer: {
+        text: "Sistema de ticket byRomeraSCR"
+      }
+    });
+
+    const actionRow = new ActionRowBuilder<ButtonBuilder>({
+      components: [
+        new ButtonBuilder({
+          url: transcriptUrl,
+          label: "Acessar Transcript",
+          style: ButtonStyle.Link,
+          emoji: "📄"
+        }),
+        new ButtonBuilder({
+          customId: BUTTON_IDS.RATE_SERVICE,
+          label: "Avaliar Atendimento",
+          style: ButtonStyle.Success,
+          emoji: "⭐"
+        })
+      ]
+    });
+
+    await user.send({
+      embeds: [dmEmbed],
+      components: [actionRow]
+    });
+  } catch (error) {
+    console.error("Erro ao enviar DM:", error);
+  }
+}
+
 function closeTicket(interaction: ButtonInteraction) {
   try {
     const channel = interaction.guild?.channels.cache.get(process.env.CANAL_LOG_TKT ?? "") as TextChannel;
     if (interaction.channel instanceof TextChannel && interaction.channel.name) {
+      const transcriptUrl = `${process.env.URL_TRANSCRIPT}/transcript-${interaction.channelId}.html`;
+      
       const logEmbed = new EmbedBuilder({
         title:(`Ticket  #${interaction.channel?.name}  Fechado com Transcript`),
         thumbnail: {
-          url: process.env.THUMBNAIL ?? ""
+          url: process.env.LOGO ?? ""
         },
         description: `O Ticket foi fechado por <@${interaction.user.id}> **com transcript.**\nPara acessar o Transcript basta clicar no botão!`,
         timestamp: new Date().toISOString(),
@@ -138,9 +255,9 @@ function closeTicket(interaction: ButtonInteraction) {
       const actionRow = new ActionRowBuilder<ButtonBuilder>({
         components: [
           new ButtonBuilder({
-            url: "https://firebasestorage.googleapis.com/v0/b/botdiscord-b5ce0.appspot.com/o/transcripts%2Ftranscript-1229933863019741316.html?alt=media&token=327919f5-653a-4ce6-b6da-997aa9cb3497",
+            url: transcriptUrl,
             label: "Acessar Transcript",
-            emoji: "🌐", 
+            emoji: "📄",
             style: ButtonStyle.Link,
           })
         ],

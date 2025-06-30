@@ -60,8 +60,8 @@ async function sendTicketMessage(channel: TextChannel) {
     footer: {
       text: "Lembre-se não abra um ticket sem necessidade",
     },
-    thumbnail: {
-      url: process.env.THUMBNAIL ?? ""
+    thumbnail:{
+      url: process.env.LOGO ?? ""
     },
     image: {
       url: process.env.BANNERTK ?? "",

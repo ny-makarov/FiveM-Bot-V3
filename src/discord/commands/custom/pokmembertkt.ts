@@ -39,7 +39,7 @@ new Component({
           text: "Lembre-se não use sem necessidade",
         },
         thumbnail: {
-          url: process.env.THUMBNAIL ?? ""
+          url: process.env.LOGO ?? ""
         },
       });
 
@@ -79,7 +79,7 @@ new Component({
               text: "byRomeraSCR",
             },
             thumbnail: {
-              url: process.env.THUMBNAIL ?? ""
+              url: process.env.LOGO ?? ""
             },
           });
 

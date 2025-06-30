@@ -1,70 +1,73 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const base_1 = require("@/discord/base");
-const discord_js_1 = require("discord.js");
-const dotenv_1 = tslib_1.__importDefault(require("dotenv"));
+import { Event } from "@/discord/base";
+import { Client, EmbedBuilder, TextChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import dotenv from 'dotenv';
 const FiveM = require("fivem-server-api");
-dotenv_1.default.config();
-const channelId = process.env.CANAL_CONNECTID;
-const titulo = process.env.TITULO;
-const thumbnail = process.env.THUMBNAIL;
-const descricao = process.env.DESCRICAO;
-const logoimg = process.env.LOGO;
-const ipServer = process.env.IP_SERVER;
+dotenv.config();
+
 const server = new FiveM.Server(process.env.IP_SERVIDOR);
-new base_1.Event({
+
+interface ServerStatus {
+    status: string;
+    players: string;
+}
+
+new Event({
     name: "ready",
-    async run(client) {
-        if (!channelId) {
+    async run(client: Client) {
+        if (!process.env.CANAL_CONNECTID) {
             console.error('Channel ID not provided in the environment variable.');
             return;
         }
+
         try {
-            const channel = await client.channels.fetch(channelId);
-            if (channel instanceof discord_js_1.TextChannel) {
+            const channel = await client.channels.fetch(process.env.CANAL_CONNECTID);
+
+            if (channel instanceof TextChannel) {
                 await sendConnectMessage(channel);
+
                 client.on("messageDelete", async (deletedMessage) => {
-                    if (deletedMessage.id === channelId) {
+                    if (deletedMessage.id === process.env.CANAL_CONNECTID) {
                         await sendConnectMessage(channel);
                     }
                 });
+
                 setInterval(async () => {
                     await sendConnectMessage(channel);
                 }, 100000);
-            }
-            else {
+            } else {
                 console.error('Channel does not exist');
             }
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Error fetching channel:', error);
         }
     }
 });
-async function sendConnectMessage(channel) {
+
+async function sendConnectMessage(channel: TextChannel) {
     try {
         await channel.bulkDelete(10, true);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error deleting messages:', error);
     }
+
     try {
-        const timeoutPromise = new Promise((resolve) => {
-            setTimeout(() => resolve({ status: "🔴Offline", players: "[0/0]" }), 3000);
+        const timeoutPromise: Promise<ServerStatus> = new Promise((resolve) => {
+            setTimeout(() => resolve({ status: "🔴Offline", players: "[0/0]" }), 3000); // Defina o tempo limite para 5 segundos
         });
-        const serverStatus = await Promise.race([checkServerConnection(), timeoutPromise]);
-        let embed = new discord_js_1.EmbedBuilder({
-            title: titulo,
+
+        const serverStatus: ServerStatus = await Promise.race([checkServerConnection(), timeoutPromise]);
+
+        let embed = new EmbedBuilder({
+            title: process.env.TITULO,
             thumbnail: {
-                url: thumbnail ?? "Link not provided"
+                url: process.env.LOGO ?? "Link not provided"
             },
             timestamp: new Date().toISOString(),
             footer: {
-                text: descricao ?? "Description not provided"
+                text: "Atualizado a cada 2 minutos | Ultima atualização"
             },
             image: {
-                url: logoimg ?? "Link not provided",
+                url: process.env.BANNERCONNECT ?? "Link not provided",
             },
             fields: [
                 {
@@ -79,42 +82,58 @@ async function sendConnectMessage(channel) {
                 },
                 {
                     name: "> __**IP FiveM:**__",
-                    value: `**\`\`\`fix\n${ipServer ?? "Not defined"}\`\`\`**`
+                    value: `**\`\`\`fix\n${process.env.IP_SERVER ?? "Not defined"}\`\`\`**`
                 }
             ]
         });
-        const row = new discord_js_1.ActionRowBuilder({ components: [
-                new discord_js_1.ButtonBuilder({
-                    url: process.env.FIVEMURL,
-                    label: "Conectar-se",
-                    style: discord_js_1.ButtonStyle.Link,
-                    emoji: "<:fivem_logo97:1225642783310741504>"
-                })
-            ] });
+
+        const row = new ActionRowBuilder<ButtonBuilder>({ components: [
+            new ButtonBuilder({
+                url: process.env.FIVEMURL,
+                label: "Conectar-se",
+                style: ButtonStyle.Link,
+                emoji: "<:icons8meuscinco48:1366072726732935300>"
+            }),
+            new ButtonBuilder({
+                url: process.env.LOJAURL,
+                label: "Acesse a Loja",
+                style: ButtonStyle.Link,
+                emoji: "<:icons8loja40:1366072744864911412>"
+            }),
+            new ButtonBuilder({
+                url: process.env.TIKTOKURL,
+                label: "TikTok",
+                style: ButtonStyle.Link,
+                emoji: "<:icons8tiktok50:1366072758349598782>"
+            }),
+        ]});
+
+        
         await channel.send({ embeds: [embed], components: [row] });
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error sending message:', error);
     }
 }
-async function checkServerConnection() {
+
+
+async function checkServerConnection(): Promise<ServerStatus> {
     try {
         const isConnected = await server.getServerStatus();
+
         let playersInfo = "Error Occured";
         if (isConnected) {
             const players = await server.getPlayers();
             if (players !== "Error Occured") {
                 const maxPlayers = await server.getMaxPlayers();
                 playersInfo = `[${players}/${maxPlayers}]`;
-            }
-            else {
+            } else {
                 playersInfo = "[0/0]";
             }
         }
+
         const status = playersInfo === "[0/0]" ? "Offline" : isConnected ? "🟢Online" : "🔴Offline";
         return { status, players: playersInfo };
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error checking server connection:', error);
         return { status: "🔴Offline", players: "[0/0]" };
     }

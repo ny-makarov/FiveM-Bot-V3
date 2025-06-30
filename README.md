@@ -1,26 +1,53 @@
-# Bot de FiveM completo para discord
 
-Esse projeto foi todo desenvolvido com TypeScript e Discord.js-V4 com SetCargo, Whitelist, Connect e Ticket com Transcript totalmente open-source para a comunidade!   
+---
 
-! Node version required: 20.10 or higher 
+# 🤖 DiscordBot V2 – Bot de FiveM completo para Discord
 
-[Setup your application](docs/setup-your-discord-application.md)
+Este projeto foi desenvolvido com **TypeScript** e **Discord.js v14**, oferecendo um bot robusto para servidores de **FiveM**, com funcionalidades essenciais para automatizar e profissionalizar sua cidade:
 
-## Scripts
-- Edite todas config no: `.env`
-- `npm i`: Istalar as dependencias ( node_modules )
-- `npm run dev`: Iniciar em dev
-- `npm run start`: Iniciar em prod
+* ✅ **SetCargo**
+* 🛂 **Whitelist** (sistema de registro de ID)
+* 🔗 **Connect** (acesso direto à cidade via Discord)
+* 🎫 **Ticket com Transcript** (atendimento completo e organizado)
+* 🌠 **Canal Rcon** (execute comandos de servidor direto do discord)
 
+> ⚠️ Requer **Node.js v20.10 ou superior**
 
-## Structures
+---
 
-Base utilizada @RinckoDEV
+## 🛠️ Instalação
 
-See how to use:
-- [Commands](docs/how-to-use-commands.md)
-- [Events](docs/how-to-use-events.md)
-- [Components](docs/how-to-use-components.md)
-- [Modals](docs/how-to-use-modals.md)
-- [Dotenv](docs/how-to-use-dotenv.md)
-- [Constants](docs/how-to-use-constants.md)
+### 📦 Scripts
+
+```bash
+# Instalar dependências
+npm install
+
+# Rodar em ambiente de desenvolvimento
+npm run dev
+
+# Rodar em ambiente de produção
+npm run start
+```
+
+### ⚙️ Configuração
+
+Todas as variáveis estão no arquivo `.env`. Edite conforme a necessidade do seu servidor.
+
+---
+
+## 📎 Configuração da Aplicação
+
+Antes de iniciar, configure sua aplicação no Discord:
+
+* 📘 [Setup da Aplicação Discord](https://discord.com/developers/applications)
+
+---
+
+## ✅ Projeto 100% Open Source
+
+Este projeto é **open source**, gratuito e disponível para a comunidade que busca um gerenciamento eficiente e automatizado para servidores de FiveM.
+
+Se este bot for útil no seu servidor, deixe seu apoio com uma ⭐ no repositório!
+
+---
