@@ -1,5 +1,6 @@
 import { ApplicationCommandType, AutocompleteInteraction, Client, ClientOptions, CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, Partials, version } from "discord.js";
-import { CustomItents, brBuilder } from "@magicyan/discord";
+import { brBuilder } from "@magicyan/core";
+import { CustomItents } from "@magicyan/discord";
 import { Command, Component, Event, Modal } from "./";
 import { log } from "@/settings";
 import { glob } from "fast-glob";

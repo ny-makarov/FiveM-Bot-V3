@@ -1,7 +1,8 @@
 import { Component, Modal } from "@/discord/base";
 import { reply } from "@/functions";
 import { settings } from "@/settings";
-import { brBuilder, createModalInput, hexToRgb } from "@magicyan/discord";
+import { brBuilder, hexToRgb } from "@magicyan/core";
+import { createModalInput } from "@magicyan/discord";
 import {
   ActionRowBuilder,
   ButtonBuilder,

@@ -1,7 +1,8 @@
 import { Event } from "@/discord/base";
 import { Client, EmbedBuilder, TextChannel } from "discord.js";
 import dotenv from 'dotenv';
-import { createRow, hexToRgb } from "@magicyan/discord";
+import { hexToRgb } from "@magicyan/core";
+import { createRow } from "@magicyan/discord";
 import { StringSelectMenuBuilder } from "discord.js";
 import { settings } from "@/settings";
 

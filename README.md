@@ -11,7 +11,7 @@ Este projeto foi desenvolvido com **TypeScript** e **Discord.js v14**, oferecend
 * 🎫 **Ticket com Transcript** (atendimento completo e organizado)
 * 🌠 **Canal Rcon** (execute comandos de servidor direto do discord)
 
-> ⚠️ Requer **Node.js v20.10 ou superior**
+> ⚠️ Requer **Node.js v20.10 ou superior** (recomendado: **v22 LTS** ou **v24+**; testado com **v26**)
 
 ---
 

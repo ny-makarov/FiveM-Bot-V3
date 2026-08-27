@@ -1,7 +1,8 @@
 import { Component } from "@/discord/base";
 import { settings } from "@/settings";
-import { createRow, hexToRgb } from "@magicyan/discord";
-import { ButtonInteraction, ComponentType, EmbedBuilder, GuildMember, StringSelectMenuBuilder, TextBasedChannel, TextChannel } from "discord.js";
+import { hexToRgb } from "@magicyan/core";
+import { createRow } from "@magicyan/discord";
+import { ButtonInteraction, ComponentType, EmbedBuilder, GuildMember, StringSelectMenuBuilder, TextChannel } from "discord.js";
 
 const BUTTON_IDS = { POKAR: "pokar-ticket" };
 
@@ -25,7 +26,8 @@ new Component({
           return;
       }
 
-      const members = (channel as TextChannel)?.members;
+      const textChannel = channel as TextChannel;
+      const members = textChannel.members;
       if (!members) {
         console.error('Não foi possível obter os membros do canal.');
         return;
@@ -59,12 +61,12 @@ new Component({
         })
       );
 
-      const message = await channel.send({ embeds: [embed], components: [row], ephemeral: false } as any);
+      const message = await textChannel.send({ embeds: [embed], components: [row] });
 
-      interaction.reply({ ephemeral: true, content: ""});
+      interaction.reply({ ephemeral: true, content: "Menu de alerta enviado."});
 
       interaction.client.on("interactionCreate", async (interaction) => {
-        if (!interaction.isSelectMenu()) return;
+        if (!interaction.isStringSelectMenu()) return;
         
         if (interaction.customId === "selecao-pokar") {
           const selectedMemberId = interaction.values[0];

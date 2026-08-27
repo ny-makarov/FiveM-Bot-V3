@@ -3,6 +3,7 @@ import {
   ActivityType,
   ApplicationCommandOptionType,
   ApplicationCommandType,
+  ChatInputCommandInteraction,
   PresenceStatusData,
   PresenceUpdateStatus,
   codeBlock,
@@ -53,7 +54,7 @@ new Command({
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],
-  async run(interaction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const { client, options } = interaction;
 
     switch (options.getSubcommand(true)) {

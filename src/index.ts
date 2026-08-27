@@ -22,7 +22,7 @@ const asCommandBuffer = (cmd: string, pwd: string): Buffer => {
 };
 
 const asHumanReadableString = (buf: Buffer): string => {
-    return buf.slice(4).toString().replace('\n', '');
+    return buf.subarray(4).toString().replace('\n', '');
 };
 
 class Rcon {

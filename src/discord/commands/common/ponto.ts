@@ -1,10 +1,13 @@
 import { Command } from "@/discord/base";
 import { settings } from "@/settings";
-import { brBuilder, createRow, hexToRgb } from "@magicyan/discord";
+import { brBuilder, hexToRgb } from "@magicyan/core";
+import { createRow } from "@magicyan/discord";
 import {
   ApplicationCommandType,
   ButtonBuilder,
+  ButtonInteraction,
   ButtonStyle,
+  ChatInputCommandInteraction,
   EmbedBuilder,
 } from "discord.js";
 
@@ -12,7 +15,7 @@ new Command({
   name: "ponto",
   description: "Abrir bate-ponto :byRomeraSCR",
   type: ApplicationCommandType.ChatInput,
-  async run(interaction) {
+  async run(interaction: ChatInputCommandInteraction) {
     const formattedDate = (date: Date) =>
       `${date.toLocaleDateString()} às ${date.toLocaleTimeString()}`;
     const user = interaction.user.toString();
@@ -88,7 +91,7 @@ new Command({
 
     let buttonsVisible = true;
 
-    collector.on("collect", async (buttonInteraction) => {
+    collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
       if (!buttonsVisible) return;
 
       const { customId } = buttonInteraction;

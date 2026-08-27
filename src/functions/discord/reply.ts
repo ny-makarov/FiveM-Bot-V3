@@ -1,5 +1,5 @@
 import { settings } from "@/settings";
-import { hexToRgb } from "@magicyan/discord";
+import { hexToRgb } from "@magicyan/core";
 import {
   AutocompleteInteraction,
   EmbedBuilder,
