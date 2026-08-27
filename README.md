@@ -1,7 +1,7 @@
 
 ---
 
-# 🤖 DiscordBot V2 – Bot de FiveM completo para Discord
+# 🤖 DiscordBot V3 – Bot de FiveM completo para Discord
 
 Este projeto foi desenvolvido com **TypeScript** e **Discord.js v14**, oferecendo um bot robusto para servidores de **FiveM**, com funcionalidades essenciais para automatizar e profissionalizar sua cidade:
 
